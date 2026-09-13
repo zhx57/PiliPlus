@@ -1,0 +1,63 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PiliPlus",
+      "request": "launch",
+      "type": "dart",
+      "preLaunchTask": "pre-build: generate build info",
+      "args": [
+        "--dart-define-from-file=pili_release.json"
+      ]
+    },
+    {
+      "name": "PiliPlus (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "preLaunchTask": "pre-build: generate build info",
+      "args": [
+        "--dart-define-from-file=pili_release.json"
+      ]
+    },
+    {
+      "name": "PiliPlus (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "preLaunchTask": "pre-build: generate build info",
+      "args": [
+        "--dart-define-from-file=pili_release.json"
+      ]
+    },
+    {
+      "name": "PiliPlus (SDK copy)",
+      "request": "launch",
+      "type": "dart",
+      "preLaunchTask": "pre-build: apply patches (SDK copy) and gen build info",
+      "args": [
+        "--dart-define-from-file=pili_release.json"
+      ]
+    },
+    {
+      "name": "PiliPlus (SDK copy) (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "preLaunchTask": "pre-build: apply patches (SDK copy) and gen build info",
+      "args": [
+        "--dart-define-from-file=pili_release.json"
+      ]
+    },
+    {
+      "name": "PiliPlus (SDK copy) (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "preLaunchTask": "pre-build: apply patches (SDK copy) and gen build info",
+      "args": [
+        "--dart-define-from-file=pili_release.json"
+      ]
+    }
+  ]
+}
