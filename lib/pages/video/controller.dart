@@ -173,6 +173,8 @@ class VideoDetailController extends GetxController
   String? videoUrl;
   String? audioUrl;
   Duration? defaultST;
+  final Map<int?, Duration> pagePlayedTimes = {};
+  int? previousPageCid;
   Duration? playedTime;
   String get playedTimePos {
     final pos = playedTime?.inMilliseconds;
@@ -830,7 +832,16 @@ class VideoDetailController extends GetxController
       await _applyFileBlocks(generation, data.timeLength ?? 0);
       if (isClosed || generation != _fileGeneration) return;
     }
-    Duration? seek = defaultST ?? playedTime;
+    if (previousPageCid != null) {
+      final previousPageTime =
+          defaultST ?? playedTime ?? plPlayerController.position.duration;
+      if (previousPageTime != Duration.zero) {
+        pagePlayedTimes[previousPageCid] = previousPageTime;
+      }
+    }
+    previousPageCid = cid.value;
+    final pagePlayedTime = pagePlayedTimes[cid.value];
+    final seek = pagePlayedTime ?? defaultST ?? playedTime;
     if (seek == .zero) seek = null;
     if (isFileSource) {
       seek = getFirstSegment(seek?.inMilliseconds ?? 0) ?? seek;
@@ -1419,6 +1430,8 @@ class VideoDetailController extends GetxController
     }
 
     playedTime = null;
+    pagePlayedTimes.clear();
+    previousPageCid = null;
     defaultST = null;
     videoUrl = null;
     audioUrl = null;
