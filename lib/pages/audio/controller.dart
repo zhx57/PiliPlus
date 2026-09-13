@@ -138,7 +138,9 @@ class AudioController extends GetxController
       _lastVolume = null;
     }
     desktopVolume.value = volume;
+    videoPlayerServiceHandler?.onVolumeChange(volume);
     player?.setVolume(volume * 100);
+    GStorage.setting.put(SettingBoxKey.desktopVolume, volume.toPrecision(3));
   }
 
   void syncVolume([_]) {
@@ -194,10 +196,26 @@ class AudioController extends GetxController
         }
       });
     }
-    videoPlayerServiceHandler
-      ?..onPlay = onPlay
-      ..onPause = onPause
-      ..onSeek = onSeek;
+    if (videoPlayerServiceHandler case final handler?) {
+      handler
+        ..onPlay = onPlay
+        ..onPause = onPause
+        ..onSeek = onSeek
+        ..setSkipCallBack(
+          owner: this,
+          next: playNext,
+          previous: playPrev,
+        )
+        ..onSetSpeed = setSpeed
+        ..onSetVolume = setVolume
+        ..onGetSpeed = () {
+          return player?.state.rate ?? 1.0;
+        }
+        ..onGetPlayRepeat = () {
+          return playMode.value;
+        }
+        ..onSetRepeatMode = setAudioPlayMode;
+    }
 
     animController = AnimationController(
       vsync: this,
@@ -209,6 +227,12 @@ class AudioController extends GetxController
         ..onPause = onPause
         ..isPlaying = isPlaying;
     }
+  }
+
+  void setAudioPlayMode(PlayRepeat mode) {
+    playMode.value = mode;
+    GStorage.setting.put(SettingBoxKey.audioPlayMode, mode.index);
+    videoPlayerServiceHandler?.onRepeatModeChange(mode);
   }
 
   bool isPlaying() {
@@ -223,8 +247,9 @@ class AudioController extends GetxController
     return player?.pause();
   }
 
-  Future<void>? onSeek(Duration duration) {
-    return player?.seek(duration);
+  Future<void>? onSeek(Duration duration) async {
+    await player?.seek(duration);
+    videoPlayerServiceHandler?.onSeeked(duration);
   }
 
   void _updateCurrItem(DetailItem item) {
@@ -844,6 +869,7 @@ class AudioController extends GetxController
     if (player case final player?) {
       this.speed = speed;
       player.setRate(speed);
+      videoPlayerServiceHandler?.onSpeedChange(speed);
     }
   }
 
@@ -924,11 +950,11 @@ class AudioController extends GetxController
       ..onPause = null
       ..isPlaying = null
       ..reset();
-    videoPlayerServiceHandler
-      ?..onPlay = null
-      ..onPause = null
-      ..onSeek = null
-      ..onVideoDetailDispose(hashCode.toString());
+    if (videoPlayerServiceHandler case final handler?) {
+      handler
+        ..clearCustomCallbacks()
+        ..onVideoDetailDispose(hashCode.toString());
+    }
     _subscriptions?.forEach((e) => e.cancel());
     _subscriptions?.clear();
     _subscriptions = null;
