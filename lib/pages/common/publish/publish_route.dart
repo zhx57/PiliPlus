@@ -41,7 +41,10 @@ class PublishRoute<T> extends PopupRoute<T> {
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: pageBuilder(context, animation, secondaryAnimation),
+      child: Material(
+        type: MaterialType.transparency,
+        child: pageBuilder(context, animation, secondaryAnimation),
+      ),
     );
   }
 

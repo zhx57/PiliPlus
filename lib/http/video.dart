@@ -32,6 +32,7 @@ import 'package:PiliPlus/models_new/video/video_relation/data.dart';
 import 'package:PiliPlus/models_new/video/video_shot/data.dart';
 import 'package:PiliPlus/models_new/video/video_tag/data.dart';
 import 'package:PiliPlus/utils/accounts.dart';
+import 'package:PiliPlus/utils/accounts/account.dart';
 import 'package:PiliPlus/utils/app_sign.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/global_data.dart';
@@ -604,7 +605,9 @@ abstract final class VideoHttp {
     List? pictures,
     bool syncToDynamic = false,
     Map<String, int>? atNameToMid,
+    Account? account,
   }) async {
+    final act = account ?? Accounts.main;
     final data = {
       'type': type,
       'oid': oid,
@@ -615,12 +618,15 @@ abstract final class VideoHttp {
         'at_name_to_mid': jsonEncode(atNameToMid), // {"name":uid}
       if (pictures != null) 'pictures': jsonEncode(pictures),
       if (syncToDynamic) 'sync_to_dynamic': 1,
-      'csrf': Accounts.main.csrf,
+      'csrf': act.csrf,
     };
     final res = await Request().post(
       Api.replyAdd,
       data: data,
-      options: Options(contentType: Headers.formUrlEncodedContentType),
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+        extra: {'account': act},
+      ),
     );
     if (res.data['code'] == 0) {
       try {
