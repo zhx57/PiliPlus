@@ -379,6 +379,12 @@ class VideoPlayerServiceHandler extends BaseAudioHandler with SeekHandler {
     final repeatMode =
         playRepeat?.toRepeatMode() ?? AudioServiceRepeatMode.none;
 
+    if (playbackState.value.playing == playing &&
+        playbackState.value.processingState == processingState &&
+        playbackState.value.repeatMode == repeatMode) {
+      return;
+    }
+
     playbackState.add(
       playbackState.value.copyWith(
         processingState: processingState,
