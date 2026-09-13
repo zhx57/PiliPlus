@@ -257,7 +257,8 @@ abstract final class LocalCacheKey {
       dynamicUpUnread = 'dynamicUpUnread',
       mixinKey = 'mixinKey',
       timeStamp = 'timeStamp',
-      buvid = 'buvid';
+      buvid = 'buvid',
+      dlnaDevices = 'dlnaDevices';
 }
 
 abstract final class VideoBoxKey {
