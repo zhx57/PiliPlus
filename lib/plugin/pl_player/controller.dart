@@ -479,6 +479,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
     return _instance?.playerStatus.value;
   }
 
+  static bool getBackgroundPlayIfExists() {
+    return _instance?.continuePlayInBackground.value ?? false;
+  }
+
   static Future<void> pauseIfExists({
     bool notify = true,
     bool isInterrupt = false,

@@ -5,6 +5,7 @@ import 'package:audio_session/audio_session.dart';
 class AudioSessionHandler {
   late AudioSession session;
   bool _playInterrupted = false;
+  bool _playingBeforeBackgroundInterruption = false;
 
   Future<bool> setActive(bool active) {
     return session.setActive(active);
@@ -20,6 +21,7 @@ class AudioSessionHandler {
 
     session.interruptionEventStream.listen((event) {
       final playerStatus = PlPlayerController.getPlayerStatusIfExists();
+      final backgroundPlay = PlPlayerController.getBackgroundPlayIfExists();
       // final player = PlPlayerController.getInstance();
       if (event.begin) {
         if (playerStatus != PlayerStatus.playing) return;
@@ -36,11 +38,13 @@ class AudioSessionHandler {
             PlPlayerController.pauseIfExists(isInterrupt: true);
             // player.pause(isInterrupt: true);
             _playInterrupted = true;
+            _playingBeforeBackgroundInterruption = true;
             break;
           case AudioInterruptionType.unknown:
             PlPlayerController.pauseIfExists(isInterrupt: true);
             // player.pause(isInterrupt: true);
             _playInterrupted = true;
+            _playingBeforeBackgroundInterruption = true;
             break;
         }
       } else {
@@ -53,7 +57,9 @@ class AudioSessionHandler {
             // player.setVolume(player.volume.value * 2);
             break;
           case AudioInterruptionType.pause:
-            if (_playInterrupted) PlPlayerController.playIfExists();
+            if (_playInterrupted || (backgroundPlay && _playingBeforeBackgroundInterruption)) {
+              PlPlayerController.playIfExists();
+            }
             //player.play();
             break;
           case AudioInterruptionType.unknown:
