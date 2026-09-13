@@ -508,16 +508,6 @@ class AudioController extends GetxController
       )
       ..open(Media(url, start: _start, extras: extras));
     _start = null;
-    if (_switchingMedia) {
-      _switchingMedia = false;
-      videoPlayerServiceHandler?.onStatusChange(
-        player?.state.playing ?? false
-            ? PlayerStatus.playing
-            : PlayerStatus.paused,
-        false,
-        false,
-      );
-    }
   }
 
   Future<void> _initPlayerIfNeeded() async {
@@ -556,7 +546,11 @@ class AudioController extends GetxController
         this.duration.value = duration.inSeconds;
       }),
       stream.playing.listen((playing) {
-        if (_switchingMedia) return;
+        if (playing) {
+          _switchingMedia = false;
+        } else if (_switchingMedia) {
+          return;
+        }
         final PlayerStatus playerStatus;
         if (playing) {
           animController.forward();
@@ -570,6 +564,9 @@ class AudioController extends GetxController
       stream.completed.listen((completed) {
         _videoDetailController?.playedTime = player!.state.duration;
         if (completed) {
+          if (shutdownTimerService.isWaiting) {
+            shutdownTimerService.handleWaiting();
+          }
           if (_switchingMedia) {
             return;
           }
@@ -578,9 +575,7 @@ class AudioController extends GetxController
             false,
             false,
           );
-          if (shutdownTimerService.isWaiting) {
-            shutdownTimerService.handleWaiting();
-          } else {
+          if (!shutdownTimerService.isWaiting) {
             switch (playMode.value) {
               case PlayRepeat.pause:
                 break;
