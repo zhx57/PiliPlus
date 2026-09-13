@@ -287,7 +287,11 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
     initDlnaDeviceCache();
     final videoDetail = this.videoDetail.value;
     final playedTimePos = videoDetailCtr.playedTimePos;
-    String videoUrl = '${HttpString.baseUrl}/video/$bvid';
+    final part = videoDetail.pages
+        ?.firstWhereOrNull((page) => page.cid == videoDetailCtr.cid.value)
+        ?.page;
+    final videoUrl =
+        '${HttpString.baseUrl}/video/$bvid${part != null && part > 1 ? '/?p=$part' : ''}';
     showDialog(
       context: context,
       builder: (_) => SimpleDialog(
@@ -310,7 +314,9 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
                     icon: const Icon(Icons.timer_outlined),
                     onPressed: () {
                       Get.back();
-                      Utils.copyText('$videoUrl$playedTimePos');
+                      Utils.copyText(
+                        '$videoUrl${playedTimePos.isEmpty ? '' : '&${playedTimePos.substring(1)}'}',
+                      );
                     },
                   )
                 : null,
