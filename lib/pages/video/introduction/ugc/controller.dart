@@ -32,6 +32,7 @@ import 'package:PiliPlus/services/service_locator.dart';
 import 'package:PiliPlus/utils/accounts.dart';
 import 'package:PiliPlus/utils/android/android_helper.dart';
 import 'package:PiliPlus/utils/device_utils.dart';
+import 'package:PiliPlus/utils/extension/iterable_ext.dart';
 import 'package:PiliPlus/utils/extension/size_ext.dart';
 import 'package:PiliPlus/utils/extension/string_ext.dart';
 import 'package:PiliPlus/utils/feed_back.dart';
@@ -314,8 +315,10 @@ class UgcIntroController extends CommonIntroController with ReloadMixin {
                     icon: const Icon(Icons.timer_outlined),
                     onPressed: () {
                       Get.back();
+                      final separator =
+                          part != null && part > 1 ? '&' : '?';
                       Utils.copyText(
-                        '$videoUrl${playedTimePos.isEmpty ? '' : '&${playedTimePos.substring(1)}'}',
+                        '$videoUrl${playedTimePos.isEmpty ? '' : '$separator${playedTimePos.substring(1)}'}',
                       );
                     },
                   )

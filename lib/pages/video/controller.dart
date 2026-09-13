@@ -833,8 +833,9 @@ class VideoDetailController extends GetxController
       if (isClosed || generation != _fileGeneration) return;
     }
     if (previousPageCid != null) {
-      final previousPageTime =
-          defaultST ?? playedTime ?? plPlayerController.position.duration;
+      final previousPageTime = defaultST ??
+          playedTime ??
+          Duration(seconds: plPlayerController.position.value);
       if (previousPageTime != Duration.zero) {
         pagePlayedTimes[previousPageCid] = previousPageTime;
       }

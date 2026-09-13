@@ -63,9 +63,13 @@ class AudioSessionHandler {
             //player.play();
             break;
           case AudioInterruptionType.unknown:
+            if (backgroundPlay && _playingBeforeBackgroundInterruption) {
+              PlPlayerController.playIfExists();
+            }
             break;
         }
         _playInterrupted = false;
+        _playingBeforeBackgroundInterruption = false;
       }
     });
 
