@@ -118,6 +118,7 @@ class AudioController extends GetxController
 
   String? _prev;
   String? _next;
+  bool _switchingMedia = false;
   bool get reachStart => _prev == null;
 
   ListOrder order = ListOrder.ORDER_NORMAL;
@@ -414,6 +415,7 @@ class AudioController extends GetxController
   }
 
   Future<bool> _queryPlayUrl() async {
+    _switchingMedia = true;
     _querySponsorBlock();
     final res = await AudioGrpc.audioPlayUrl(
       itemType: itemType,
@@ -489,6 +491,7 @@ class AudioController extends GetxController
     http_model.Volume? volume,
   }) async {
     await _initPlayerIfNeeded();
+    _switchingMedia = false;
     final extras = audioFilterExtras(volume);
     player
       ?..setMediaHeader(
@@ -548,12 +551,15 @@ class AudioController extends GetxController
       }),
       stream.completed.listen((completed) {
         _videoDetailController?.playedTime = player!.state.duration;
-        videoPlayerServiceHandler?.onStatusChange(
-          PlayerStatus.completed,
-          false,
-          false,
-        );
         if (completed) {
+          if (_switchingMedia) {
+            return;
+          }
+          videoPlayerServiceHandler?.onStatusChange(
+            PlayerStatus.completed,
+            false,
+            false,
+          );
           if (shutdownTimerService.isWaiting) {
             shutdownTimerService.handleWaiting();
           } else {
