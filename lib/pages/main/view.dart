@@ -68,7 +68,18 @@ class _MainAppState extends PopScopeState<MainApp>
         _handleTray();
       }
     }
-    if (PlatformUtils.isMobile || Platform.isLinux) {
+    if (Platform.isWindows) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          PiliScheme.init(
+            beforeRoute: () async {
+              await _show();
+              await windowManager.focus();
+            },
+          );
+        }
+      });
+    } else if (PlatformUtils.isMobile || Platform.isLinux) {
       PiliScheme.init();
     }
   }
