@@ -258,6 +258,7 @@ abstract final class VideoHttp {
     required VideoType videoType,
     String? language,
     bool voiceBalance = false,
+    CancelToken? cancelToken,
   }) async {
     final dmImgStr = Utils.base64EncodeRandomString(16, 64);
     final dmCoverImgStr = Utils.base64EncodeRandomString(32, 128);
@@ -286,7 +287,11 @@ abstract final class VideoHttp {
     });
 
     try {
-      final res = await Request().get(videoType.api, queryParameters: params);
+      final res = await Request().get(
+        videoType.api,
+        queryParameters: params,
+        cancelToken: cancelToken,
+      );
 
       if (res.data['code'] == 0) {
         late PlayUrlModel data;
@@ -307,7 +312,9 @@ abstract final class VideoHttp {
                   result['play_view_business_info']?['user_status']?['watch_progress']?['current_watch_progress'];
         }
         return Success(data);
-      } else if (epid != null && videoType == .ugc) {
+      } else if (epid != null &&
+          videoType == .ugc &&
+          cancelToken?.isCancelled != true) {
         return await videoUrl(
           avid: avid,
           bvid: bvid,
@@ -317,6 +324,7 @@ abstract final class VideoHttp {
           seasonId: seasonId,
           tryLook: tryLook,
           videoType: .pgc,
+          cancelToken: cancelToken,
         );
       }
       return Error(_parseVideoErr(res.data['code'], res.data['message']));
