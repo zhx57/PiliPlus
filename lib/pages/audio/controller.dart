@@ -415,19 +415,27 @@ class AudioController extends GetxController
   }
 
   Future<bool> _queryPlayUrl() async {
-    _switchingMedia = true;
-    _querySponsorBlock();
-    final res = await AudioGrpc.audioPlayUrl(
-      itemType: itemType,
-      oid: oid,
-      subId: subId,
-    );
-    if (res case Success(:final response)) {
-      _onPlay(response);
-      return true;
-    } else {
-      res.toast();
-      return false;
+    var switched = false;
+    try {
+      _querySponsorBlock();
+      final res = await AudioGrpc.audioPlayUrl(
+        itemType: itemType,
+        oid: oid,
+        subId: subId,
+      );
+      if (res case Success(:final response)) {
+        _switchingMedia = true;
+        _onPlay(response);
+        switched = true;
+        return true;
+      } else {
+        res.toast();
+        return false;
+      }
+    } finally {
+      if (!switched) {
+        _switchingMedia = false;
+      }
     }
   }
 
@@ -491,7 +499,6 @@ class AudioController extends GetxController
     http_model.Volume? volume,
   }) async {
     await _initPlayerIfNeeded();
-    _switchingMedia = false;
     final extras = audioFilterExtras(volume);
     player
       ?..setMediaHeader(
@@ -501,6 +508,16 @@ class AudioController extends GetxController
       )
       ..open(Media(url, start: _start, extras: extras));
     _start = null;
+    if (_switchingMedia) {
+      _switchingMedia = false;
+      videoPlayerServiceHandler?.onStatusChange(
+        player?.state.playing ?? false
+            ? PlayerStatus.playing
+            : PlayerStatus.paused,
+        false,
+        false,
+      );
+    }
   }
 
   Future<void> _initPlayerIfNeeded() async {
@@ -539,6 +556,7 @@ class AudioController extends GetxController
         this.duration.value = duration.inSeconds;
       }),
       stream.playing.listen((playing) {
+        if (_switchingMedia) return;
         final PlayerStatus playerStatus;
         if (playing) {
           animController.forward();
