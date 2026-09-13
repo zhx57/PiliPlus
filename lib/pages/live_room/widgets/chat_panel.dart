@@ -235,14 +235,24 @@ class LiveRoomChatPanel extends StatelessWidget {
 
   InlineSpan _buildMsg(double devicePixelRatio, DanmakuMsg obj) {
     final uemote = obj.uemote;
+    const maxEmoteSize = 32.0;
     if (uemote != null) {
       // "room_{{room_id}}_{{int}}" , "upower_[{{emote}}]" , "official_{{int}}"
       final double width, height;
       if (uemote.isOfficial) {
-        width = uemote.width / devicePixelRatio;
-        height = uemote.height / devicePixelRatio;
+        width = (uemote.width / devicePixelRatio).clamp(
+          0.0,
+          maxEmoteSize,
+        );
+        height = (uemote.height / devicePixelRatio).clamp(
+          0.0,
+          maxEmoteSize,
+        );
       } else {
-        width = height = 162.0 / devicePixelRatio;
+        width = height = (162.0 / devicePixelRatio).clamp(
+          0.0,
+          maxEmoteSize,
+        );
       }
       return WidgetSpan(
         child: NetworkImgLayer(
@@ -262,13 +272,15 @@ class LiveRoomChatPanel extends StatelessWidget {
         onMatch: (match) {
           final key = match[0]!;
           final emote = emots[key]!;
+          final width = emote.width.clamp(0.0, maxEmoteSize);
+          final height = emote.height.clamp(0.0, maxEmoteSize);
           spanChildren.add(
             WidgetSpan(
               child: NetworkImgLayer(
                 src: emote.url,
                 type: .emote,
-                width: emote.width,
-                height: emote.height,
+                width: width,
+                height: height,
               ),
             ),
           );
